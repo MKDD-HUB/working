@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Form with Image Upload</title>
+    <title>Dynamic Email Sender</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -93,14 +93,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>Contact Us</h1>
+        <h1>Send Email</h1>
         
-        <!-- Replace YOUR_EMAIL with your actual email address -->
-        <form action="https://formsubmit.co/onlyfans2473652025@gmail.com" method="POST" enctype="multipart/form-data">
+        <!-- Form configuration section -->
+        <div class="form-group">
+            <label for="recipient">Recipient Email</label>
+            <input type="email" id="recipient" placeholder="Enter the email address to send to" required>
+        </div>
+        
+        <form id="emailForm">
             <!-- FormSubmit Configuration -->
             <input type="hidden" name="_template" value="box">
             <input type="hidden" name="_captcha" value="false">
-            <!-- <input type="hidden" name="_next" value="https://yourdomain.com/thank-you.html"> -->
             <input type="hidden" name="image-data" id="image-data">
             
             <div class="form-group">
@@ -159,25 +163,58 @@
         });
         
         // Form submission handling
-        document.querySelector('form').addEventListener('submit', function(e) {
-            const statusMessage = document.getElementById('status-message');
+        document.getElementById('emailForm').addEventListener('submit', function(e) {
+            e.preventDefault();
             
-            // Basic validation
-            const email = document.getElementById('email').value;
-            if (!email.includes('@')) {
-                e.preventDefault();
-                statusMessage.innerText = 'Please enter a valid email address.';
+            // Get recipient email
+            const recipientEmail = document.getElementById('recipient').value;
+            
+            if (!recipientEmail || !recipientEmail.includes('@')) {
+                const statusMessage = document.getElementById('status-message');
+                statusMessage.innerText = 'Please enter a valid recipient email address.';
                 statusMessage.className = 'error';
                 statusMessage.style.display = 'block';
                 return;
             }
             
-            // Success message (only shows if form wasn't redirected)
-            setTimeout(function() {
-                statusMessage.innerText = 'Your message has been sent! Thank you.';
-                statusMessage.className = 'success';
-                statusMessage.style.display = 'block';
-            }, 2000);
+            // Dynamically create and submit the form to FormSubmit.co
+            const formData = new FormData(this);
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = `https://formsubmit.co/${recipientEmail}`;
+            form.enctype = 'multipart/form-data';
+            
+            // Transfer all form data to the new form
+            for (let pair of formData.entries()) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = pair[0];
+                input.value = pair[1];
+                form.appendChild(input);
+            }
+            
+            // Add FormSubmit config
+            const templateInput = document.createElement('input');
+            templateInput.type = 'hidden';
+            templateInput.name = '_template';
+            templateInput.value = 'box';
+            form.appendChild(templateInput);
+            
+            const captchaInput = document.createElement('input');
+            captchaInput.type = 'hidden';
+            captchaInput.name = '_captcha';
+            captchaInput.value = 'false';
+            form.appendChild(captchaInput);
+            
+            // Append to body, submit, and remove
+            document.body.appendChild(form);
+            form.submit();
+            
+            // Success message
+            const statusMessage = document.getElementById('status-message');
+            statusMessage.innerText = 'Sending your message...';
+            statusMessage.className = 'success';
+            statusMessage.style.display = 'block';
         });
     </script>
 </body>
