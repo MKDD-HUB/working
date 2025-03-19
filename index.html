@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Email Sender</title>
+    <title>Contact Form with Dynamic Recipient</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -72,150 +72,66 @@
             display: none;
         }
         
-        #status-message {
-            margin-top: 15px;
-            padding: 10px;
+        .setup-instructions {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            margin-bottom: 20px;
             border-radius: 4px;
-            text-align: center;
-            display: none;
-        }
-        
-        .success {
-            background-color: #d4edda;
-            color: #155724;
-        }
-        
-        .error {
-            background-color: #f8d7da;
-            color: #721c24;
+            font-size: 14px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Send Email</h1>
-        
-        <!-- Form configuration section -->
-        <div class="form-group">
-            <label for="recipient">Recipient Email</label>
-            <input type="email" id="recipient" placeholder="Enter the email address to send to" required>
+        <h1>Contact Form</h1>
+
+        <div class="setup-instructions">
+            <strong>Setup Instructions:</strong>
+            <ol>
+                <li>Deploy this page to Netlify (drag and drop this HTML file to Netlify.com)</li>
+                <li>Go to your site settings and set up form notifications</li>
+                <li>Remove these instructions after setup</li>
+            </ol>
         </div>
         
-        <form id="emailForm">
-            <!-- FormSubmit Configuration -->
-            <input type="hidden" name="_template" value="box">
-            <input type="hidden" name="_captcha" value="false">
-            <input type="hidden" name="image-data" id="image-data">
+        <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+            <p class="hidden" style="display:none">
+                <label>Don't fill this out if you're human: <input name="bot-field" /></label>
+            </p>
+            
+            <div class="form-group">
+                <label for="recipient">Email Recipient</label>
+                <input type="email" name="recipient" id="recipient" required />
+            </div>
             
             <div class="form-group">
                 <label for="name">Your Name</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" name="name" id="name" required />
             </div>
             
             <div class="form-group">
                 <label for="email">Your Email</label>
-                <input type="email" id="email" name="email" required>
+                <input type="email" name="email" id="email" required />
             </div>
             
             <div class="form-group">
                 <label for="subject">Subject</label>
-                <input type="text" id="subject" name="subject" required>
+                <input type="text" name="subject" id="subject" required />
             </div>
             
             <div class="form-group">
                 <label for="message">Message</label>
-                <textarea id="message" name="message" required></textarea>
+                <textarea name="message" id="message" required></textarea>
             </div>
             
             <div class="form-group">
-                <label for="image">Attach Image (Optional)</label>
-                <input type="file" id="image" accept="image/*">
-                <img id="preview" class="image-preview">
+                <label for="attachment">Attachment (Optional)</label>
+                <input type="file" name="attachment" id="attachment" />
             </div>
             
-            <button type="submit" id="submit-btn">Send Message</button>
+            <button type="submit">Send Message</button>
         </form>
-        
-        <div id="status-message"></div>
     </div>
-
-    <script>
-        // Image preview and base64 encoding
-        document.getElementById('image').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            const preview = document.getElementById('preview');
-            
-            if (file) {
-                // Show image preview
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    preview.src = e.target.result;
-                    preview.style.display = 'block';
-                    
-                    // Store base64 data in hidden input
-                    document.getElementById('image-data').value = e.target.result;
-                }
-                reader.readAsDataURL(file);
-            } else {
-                // Hide preview if no file selected
-                preview.style.display = 'none';
-            }
-        });
-        
-        // Form submission handling
-        document.getElementById('emailForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Get recipient email
-            const recipientEmail = document.getElementById('recipient').value;
-            
-            if (!recipientEmail || !recipientEmail.includes('@')) {
-                const statusMessage = document.getElementById('status-message');
-                statusMessage.innerText = 'Please enter a valid recipient email address.';
-                statusMessage.className = 'error';
-                statusMessage.style.display = 'block';
-                return;
-            }
-            
-            // Dynamically create and submit the form to FormSubmit.co
-            const formData = new FormData(this);
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = `https://formsubmit.co/${recipientEmail}`;
-            form.enctype = 'multipart/form-data';
-            
-            // Transfer all form data to the new form
-            for (let pair of formData.entries()) {
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = pair[0];
-                input.value = pair[1];
-                form.appendChild(input);
-            }
-            
-            // Add FormSubmit config
-            const templateInput = document.createElement('input');
-            templateInput.type = 'hidden';
-            templateInput.name = '_template';
-            templateInput.value = 'box';
-            form.appendChild(templateInput);
-            
-            const captchaInput = document.createElement('input');
-            captchaInput.type = 'hidden';
-            captchaInput.name = '_captcha';
-            captchaInput.value = 'false';
-            form.appendChild(captchaInput);
-            
-            // Append to body, submit, and remove
-            document.body.appendChild(form);
-            form.submit();
-            
-            // Success message
-            const statusMessage = document.getElementById('status-message');
-            statusMessage.innerText = 'Sending your message...';
-            statusMessage.className = 'success';
-            statusMessage.style.display = 'block';
-        });
-    </script>
 </body>
 </html>
